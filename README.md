@@ -13,5 +13,9 @@ $ ./kafka-console-producer.sh --broker-list 127.0.0.1:9092 --topic test_input_to
 >test
 
 
+**What does this sample App do?**
+
+This app mask the user credentials from an incoming transaction.
+
 
 
