@@ -2,27 +2,23 @@ package com.thebigscale.app
 
 import java.util.Properties
 
-import com.thebigscale.common.Types.BYTE_ARRAY
 import com.thebigscale.conf.KafkaConf
 import com.thebigscale.domain.Person
-import com.thebigscale.serdes.KafkaBytesSerializer
-import org.apache.kafka.clients.producer.{Callback, KafkaProducer, ProducerRecord, RecordMetadata}
+import org.apache.kafka.clients.producer._
 
 object ProducerApp extends App {
 
   val  props = new Properties()
-  props.put("bootstrap.servers", "localhost:9092")
+  props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
 
-  props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
-  props.put("value.serializer", "com.thebigscale.serdes.PersonSerializer")
+  props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer")
+  props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[com.thebigscale.serdes.KafkaBytesSerializer[Person]])
 
-  val producer = new KafkaProducer[String, BYTE_ARRAY](props)
+  val producer = new KafkaProducer[String, Person](props)
 
   val person = new Person(4, "user4", 27)
-  val personSerializer = new KafkaBytesSerializer[Person]()
-  val bytePerson: BYTE_ARRAY = personSerializer.serialize("", person)
 
-  val record = new ProducerRecord[String, BYTE_ARRAY](KafkaConf.INPUT_TOPIC, "key1", bytePerson)
+  val record = new ProducerRecord[String, Person](KafkaConf.INPUT_TOPIC, "key1", person)
   producer.send(record, new Callback {
     override def onCompletion(metadata: RecordMetadata, exception: Exception): Unit = {
       if (exception != null ) {
